@@ -1,22 +1,24 @@
 'use client';
 
-import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Loader2 } from 'lucide-react';
+import { isAuthenticated } from '../lib/auth';
 
-export default function DashboardLayout({ children }) {
-  const { user, loading } = useAuth();
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isAuthenticated()) {
       router.push('/');
+    } else {
+      setIsReady(true);
     }
-  }, [user, loading, router]);
+  }, [router]);
 
-  if (loading) {
+  if (!isReady) {
     return (
       <div className="loader-container">
         <Loader2 size={40} className="spin" color="#6366f1" />
@@ -28,12 +30,17 @@ export default function DashboardLayout({ children }) {
             justify-content: center;
             background: var(--bg-main);
           }
+          .spin {
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
         `}</style>
       </div>
     );
   }
-
-  if (!user) return null;
 
   return (
     <div className="dashboard-layout">

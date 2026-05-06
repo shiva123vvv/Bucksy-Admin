@@ -1,28 +1,42 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LayoutDashboard, Lock, Mail, Loader2 } from 'lucide-react';
+import api from '../utils/api';
+import { saveToken, isAuthenticated } from '../lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    if (isAuthenticated()) {
+      router.push('/dashboard');
+    }
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      router.push('/dashboard');
-    } catch (err) {
-      setError('Invalid credentials or unauthorized access.');
+      const response = await api.post('/admin/login', { email, password });
+      
+      if (response.data && response.data.token) {
+        saveToken(response.data.token);
+        router.push('/dashboard');
+      } else {
+        throw new Error('No token received');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Invalid credentials or unauthorized access.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -45,7 +59,7 @@ export default function LoginPage() {
           width: 100%;
           max-width: 420px;
           background: var(--bg-card);
-          border: 1px border var(--border);
+          border: 1px solid var(--border);
           border-radius: 24px;
           padding: 40px;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -176,6 +190,15 @@ export default function LoginPage() {
           font-size: 13px;
           color: var(--text-muted);
         }
+
+        .spin {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
       `}</style>
 
       <div className="login-card">
@@ -231,7 +254,7 @@ export default function LoginPage() {
         </form>
 
         <p className="footer-note">
-          Secured with Firebase Authentication
+          Secured with JWT Authentication
         </p>
       </div>
     </div>

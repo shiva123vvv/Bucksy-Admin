@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
-  LayoutDashboard, Users, CreditCard, Gift, Settings, 
-  LogOut, ShieldCheck, ChevronRight, Activity, Globe 
+  LayoutDashboard, Users, CreditCard, Settings, 
+  LogOut, ShieldCheck, ChevronRight, Activity 
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { removeToken } from '../lib/auth';
 
 const menuItems = [
   { id: 'dashboard', label: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
@@ -19,7 +19,12 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { logout, user } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    removeToken();
+    router.push('/');
+  };
 
   return (
     <aside className="sidebar">
@@ -101,49 +106,6 @@ export default function Sidebar() {
           border-top: 1px solid var(--border);
         }
 
-        .user-profile {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.02);
-          margin-bottom: 16px;
-        }
-
-        .avatar {
-          width: 38px;
-          height: 38px;
-          background: var(--border);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--text-main);
-          font-weight: 700;
-          font-size: 14px;
-        }
-
-        .user-info {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .user-name {
-          font-size: 13px;
-          font-weight: 700;
-          color: var(--text-main);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .user-role {
-          font-size: 11px;
-          color: var(--text-muted);
-          font-weight: 500;
-        }
-
         .logout-btn {
           width: 100%;
           display: flex;
@@ -155,6 +117,9 @@ export default function Sidebar() {
           font-size: 14px;
           font-weight: 700;
           transition: all 0.2s;
+          background: transparent;
+          border: none;
+          cursor: pointer;
         }
 
         .logout-btn:hover {
@@ -186,16 +151,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="user-profile">
-          <div className="avatar">
-            {user?.email?.charAt(0).toUpperCase() || 'A'}
-          </div>
-          <div className="user-info">
-            <div className="user-name">{user?.email?.split('@')[0] || 'Admin'}</div>
-            <div className="user-role">{user?.role?.toUpperCase() || 'ADMIN'}</div>
-          </div>
-        </div>
-        <button onClick={logout} className="logout-btn">
+        <button onClick={handleLogout} className="logout-btn">
           <LogOut size={18} />
           <span>Sign Out</span>
         </button>

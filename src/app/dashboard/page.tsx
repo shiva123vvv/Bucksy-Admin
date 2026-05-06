@@ -7,15 +7,25 @@ import {
 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '../../utils/api';
+import { isAuthenticated } from '../../lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [recentWithdrawals, setRecentWithdrawals] = useState<any[]>([]);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push('/');
+      return;
+    }
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -40,7 +50,7 @@ export default function Dashboard() {
       }
     };
     fetchData();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (

@@ -4,19 +4,15 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Admin Panel | EarnRewardzz',
-  description: 'Premium administrative dashboard for EarnRewardzz ecosystem.',
+  title: 'Admin Panel | Bucksy',
+  description: 'Premium administrative dashboard for Bucksy ecosystem.',
 };
 
-import { AuthProvider } from '../context/AuthContext';
-
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
       </body>
     </html>
   );
